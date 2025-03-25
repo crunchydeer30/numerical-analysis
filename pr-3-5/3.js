@@ -13,9 +13,9 @@ function determinant(matrix) {
   return det;
 }
 
-function adjugateMatrix(matrix) {
+function cofactorMatrix(matrix) {
   const n = matrix.length;
-  let adj = Array(n)
+  let cofactors = Array(n)
     .fill(null)
     .map(() => Array(n).fill(0));
 
@@ -26,12 +26,32 @@ function adjugateMatrix(matrix) {
         .map((row) => row.filter((_, col) => col !== j));
 
       const minorDet = determinant(subMatrix);
-      const cofactor = (i + j) % 2 === 0 ? minorDet : -minorDet;
-
-      adj[j][i] = cofactor; // Сразу транспонируем
+      // Вычисляем кофактор по формуле: (-1)^(i+j) * det(минор)
+      cofactors[i][j] = (i + j) % 2 === 0 ? minorDet : -minorDet;
     }
   }
-  return adj;
+  return cofactors;
+}
+
+function transpose(matrix) {
+  const n = matrix.length;
+  let transposed = Array(n)
+    .fill(null)
+    .map(() => Array(n).fill(0));
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      transposed[j][i] = matrix[i][j];
+    }
+  }
+  return transposed;
+}
+
+function adjugateMatrix(matrix) {
+  // Сначала вычисляем матрицу кофакторов
+  const cofactors = cofactorMatrix(matrix);
+  // Затем транспонируем её, чтобы получить присоединённую матрицу
+  return transpose(cofactors);
 }
 
 function inverseMatrix(matrix) {
@@ -44,8 +64,12 @@ function inverseMatrix(matrix) {
   console.log(`Определитель: ${det}\n`);
 
   console.log("Вычисляем матрицу алгебраических дополнений...");
-  const adj = adjugateMatrix(matrix);
-  printMatrix(adj, "Присоединённая матрица (Adjugate)");
+  const cofactors = cofactorMatrix(matrix);
+  printMatrix(cofactors, "Матрица кофакторов");
+
+  console.log("Транспонируем матрицу кофакторов...");
+  const adj = transpose(cofactors);
+  printMatrix(adj, "Присоединённая матрица");
 
   console.log("Находим обратную матрицу...");
   const inverse = adj.map((row) => row.map((value) => value / det));
